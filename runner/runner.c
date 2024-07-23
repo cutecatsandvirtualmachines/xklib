@@ -3,16 +3,12 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#include <errno.h>
 
-struct mystruct {
-	int age;
-	char* name;
-};
+#include "ioctl.h"
 
 int main() {
-	int answer;
-	struct mystruct test = {4, "Johannes"};
-	int dev = open("/dev/dummy", O_WRONLY);
+	int dev = open("/dev/dummy", O_RDWR);
 	if(dev == -1) {
 		printf("Opening was not possible!\n");
 		return -1;
@@ -20,9 +16,13 @@ int main() {
 
 	printf("Opening was successfull!\n");
 
-	char out[1] = {0};
+	xklib_ioctl_data data = {0};
+	data.init.vmcall_key = 0xdeadbeef;
+
+	printf("Calling with IOCTL: 0x%llx\n", xklib_init);
+	printf("IOCTL result: %d\n", ioctl(dev, xklib_init, &data));
+	printf("Last error: %d\n", errno);
 	
-	read(dev, out, 1);
 	close(dev);
 	return 0;
 }

@@ -1,114 +1,80 @@
-#include <linux/module.h>
-#include <linux/init.h>
-#include <linux/fs.h>
-#include <linux/cdev.h>
-#include <linux/uaccess.h>
+#include "xklib.h"
 
 /* Meta Information */
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("cutecatsandvirtualmachines");
 MODULE_DESCRIPTION("~");
 
-/* Variables for device and device class */
-static dev_t my_device_nr;
-static struct class *my_class;
-static struct cdev my_device;
+bool bXklibInit = false;
 
-#define DRIVER_NAME "xklib"
-#define DRIVER_CLASS "XKClass"
-
-/**
- * @brief Read data out of the buffer
- */
-static ssize_t driver_read(struct file *File, char *user_buffer, size_t count, loff_t *offs) {
-	return 0;
-}
-
-/**
- * @brief Write data to buffer
- */
-static ssize_t driver_write(struct file *File, const char *user_buffer, size_t count, loff_t *offs) {
-	return 0;
-}
-
-/**
- * @brief This function is called, when the device file is opened
- */
 static int driver_open(struct inode *device_file, struct file *instance) {
-	printk("dev_nr - open was called!\n");
 	return 0;
 }
 
-/**
- * @brief This function is called, when the device file is opened
- */
 static int driver_close(struct inode *device_file, struct file *instance) {
-	printk("dev_nr - close was called!\n");
 	return 0;
+}
+
+static int main_ioctl(struct file *file, unsigned int cmd, xklib_ioctl_data* arg) {
+	xklib_ioctl_data kernel_data = {0};
+
+	if(!access_ok(arg, sizeof(arg))) {
+		printk("Supplied argument pointer is invalid: %p", arg);
+		return EINVAL;
+	}
+	if(copy_from_user(&kernel_data, arg, sizeof(arg))) {
+		printk("Failed copying IOCTL data!\n");
+		return ENODATA;
+	}
+
+	switch(cmd) {
+		case xklib_init: {
+			printk("Passed vmcall key to init: 0x%llx\n", kernel_data.init.vmcall_key);
+			break;
+		}
+		default: {
+			printk("Could not find a valid command for: %d\n", cmd);
+			break;
+		}
+	}
+        return 0;
 }
 
 static struct file_operations fops = {
 	.owner = THIS_MODULE,
 	.open = driver_open,
 	.release = driver_close,
-	.read = driver_read,
-	.write = driver_write
+	.unlocked_ioctl = main_ioctl
 };
 
-/**
- * @brief This function is called, when the module is loaded into the kernel
- */
 static int __init ModuleInit(void) {
-	int retval;
-	printk("Hello, Kernel!\n");
+	if(bXklibInit) {
+		printk("XKLib has already been initialized...?\n");
+		return 0;
+	}
 
-	/* Allocate a device nr */
-	if( alloc_chrdev_region(&my_device_nr, 0, 1, DRIVER_NAME) < 0) {
-		printk("Device Nr. could not be allocated!\n");
+	printk("XKLib initializing...\n");
+
+	int retval = register_chrdev(511, "/dev/dummy", &fops);
+	if(retval == 0) {
+		printk("ioctl_example - registered Device number Major: %d, Minor: %d\n", 511, 0);
+	}
+	else if(retval > 0) {
+		printk("ioctl_example - registered Device number Major: %d, Minor: %d\n", retval>>20, retval&0xfffff);
+	}
+	else {
+		printk("Could not register device number!\n");
 		return -1;
 	}
-	printk("read_write - Device Nr. Major: %d, Minor: %d was registered!\n", my_device_nr >> 20, my_device_nr & 0xfffff);
 
-	/* Create device class */
-	if((my_class = class_create(DRIVER_CLASS)) == NULL) {
-		printk("Device class can not be created!\n");
-		goto ClassError;
-	}
+	bXklibInit = true;
 
-	/* create device file */
-	if(device_create(my_class, NULL, my_device_nr, NULL, DRIVER_NAME) == NULL) {
-		printk("Can not create device file!\n");
-		goto FileError;
-	}
-
-	/* Initialize device file */
-	cdev_init(&my_device, &fops);
-
-	/* Regisering device to kernel */
-	if(cdev_add(&my_device, my_device_nr, 1) == -1) {
-		printk("Registering of device to kernel failed!\n");
-		goto AddError;
-	}
-
-	return 0;
-AddError:
-	device_destroy(my_class, my_device_nr);
-FileError:
-	class_destroy(my_class);
-ClassError:
-	unregister_chrdev_region(my_device_nr, 1);
-	return -1;
+	return retval;
 }
 
-/**
- * @brief This function is called, when the module is removed from the kernel
- */
 static void __exit ModuleExit(void) {
-	cdev_del(&my_device);
-	device_destroy(my_class, my_device_nr);
-	class_destroy(my_class);
-	unregister_chrdev_region(my_device_nr, 1);
-	printk("Goodbye, Kernel\n");
+	unregister_chrdev(511, "/dev/dummy");
+	printk("XKLib exiting\n");
 }
 
 module_init(ModuleInit);
