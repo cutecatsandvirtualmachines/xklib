@@ -23,4 +23,15 @@ struct pt {
 	pte_t entry[512];
 };
 
-bool page_mapping_exist(unsigned long addr, size_t size);
+enum last_pt_type { pt_type_invalid, pt_type_pte, pt_type_pmd };
+
+typedef union _last_pt_t {
+	struct {
+		pte_t pte;
+		pmd_t pmd;
+	} value;
+	enum last_pt_type pt_type;
+} last_pt_t;
+
+last_pt_t get_last_pt(unsigned long addr);
+bool page_mapping_exist(unsigned long addr);
