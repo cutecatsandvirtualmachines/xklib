@@ -1,15 +1,38 @@
 {
     "configurations": [
         {
-            "name": "Linux",
+            "name": "KernelDriver",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}",
+                "${workspaceFolder}/include",
+                "/lib/modules/6.8.0-38-generic/build/include",
+                "/lib/modules/6.8.0-38-generic/build/include/uapi",
+                "/lib/modules/6.8.0-38-generic/build/include/generated",
+                "/lib/modules/6.8.0-38-generic/build/arch/x86/include",
+                "/lib/modules/6.8.0-38-generic/build/arch/x86/include/uapi",
+                "/lib/modules/6.8.0-38-generic/build/arch/x86/include/generated"
             ],
-            "defines": [],
-            "compilerPath": "/usr/bin/clang",
-            "cStandard": "c17",
+            "defines": [
+                "KBUILD_MODNAME=\"hello_module\"",
+                "__GNUC__",
+                "__KERNEL__",
+                "MODULE"
+            ],
+            "intelliSenseMode": "clang-x64",
+            "browse": {
+                "path": [
+                    "${workspaceFolder}",
+                    "/lib/modules/6.8.0-38-generic/build/include",
+                    "/lib/modules/6.8.0-38-generic/build/mm",
+                    "/lib/modules/6.8.0-38-generic/build/fs",
+                    "/lib/modules/6.8.0-38-generic/build/kernel"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            },
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "gnu11",
             "cppStandard": "c++17",
-            "intelliSenseMode": "linux-clang-x64",
             "configurationProvider": "ms-vscode.makefile-tools"
         }
     ],
