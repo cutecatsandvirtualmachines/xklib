@@ -80,7 +80,6 @@ static int __init ModuleInit(void)
 		dbg_msg("Could not register device number!");
 		return -1;
 	}
-
 	bXklibInit = true;
 
 	return retval;
