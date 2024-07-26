@@ -6,6 +6,4 @@ typedef union _xklib_ioctl_data {
 	} init;
 } xklib_ioctl_data, *pxklib_ioctl_data;
 
-enum xklib_ioctl_code {
-	xklib_init = _IOR(511, 1, xklib_ioctl_data *)
-};
+enum xklib_ioctl_code { xklib_init = _IOR(511, 1, xklib_ioctl_data *) };

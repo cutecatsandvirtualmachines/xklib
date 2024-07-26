@@ -5,6 +5,8 @@
 #include <linux/uaccess.h>
 
 #include "ioctl.h"
+#include "debug.h"
+#include "memory.h"
 
 #define DEVICE_NAME "xklib"
 #define CLASS_NAME "XKClass"

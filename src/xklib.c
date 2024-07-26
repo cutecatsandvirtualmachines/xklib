@@ -19,21 +19,21 @@ static int main_ioctl(struct file *file, unsigned int cmd, xklib_ioctl_data* arg
 	xklib_ioctl_data kernel_data = {0};
 
 	if(!access_ok(arg, sizeof(arg))) {
-		printk("Supplied argument pointer is invalid: %p", arg);
+		dbg_msg("Supplied argument pointer is invalid: %p", arg);
 		return EINVAL;
 	}
 	if(copy_from_user(&kernel_data, arg, sizeof(arg))) {
-		printk("Failed copying IOCTL data!\n");
+		dbg_msg("Failed copying IOCTL data!");
 		return ENODATA;
 	}
 
 	switch(cmd) {
 		case xklib_init: {
-			printk("Passed vmcall key to init: 0x%llx\n", kernel_data.init.vmcall_key);
+			dbg_msg("Passed vmcall key to init: 0x%llx", kernel_data.init.vmcall_key);
 			break;
 		}
 		default: {
-			printk("Could not find a valid command for: %d\n", cmd);
+			dbg_msg("Could not find a valid command for: %d", cmd);
 			break;
 		}
 	}
@@ -49,21 +49,31 @@ static struct file_operations fops = {
 
 static int __init ModuleInit(void) {
 	if(bXklibInit) {
-		printk("XKLib has already been initialized...?\n");
+		dbg_msg("XKLib has already been initialized...?");
 		return 0;
 	}
 
-	printk("XKLib initializing...\n");
+	dbg_msg("XKLib initializing...");
+
+	char* p = kmalloc(8, GFP_KERNEL);
+	char* identity_base = p - virt_to_phys(p);
+	dbg_msg("Current PAGE_OFFSET: 0x%llx", identity_base);
+	xuint64_t i = 0;
+	while(!*(size_t*)(identity_base + i)) {
+		i += 8;
+	}
+	dbg_msg("data: 0x%llx", *(size_t*)(identity_base + i));
+	kfree(p);
 
 	int retval = register_chrdev(511, "/dev/dummy", &fops);
 	if(retval == 0) {
-		printk("ioctl_example - registered Device number Major: %d, Minor: %d\n", 511, 0);
+		dbg_msg("ioctl_example - registered Device number Major: %d, Minor: %d", 511, 0);
 	}
 	else if(retval > 0) {
-		printk("ioctl_example - registered Device number Major: %d, Minor: %d\n", retval>>20, retval&0xfffff);
+		dbg_msg("ioctl_example - registered Device number Major: %d, Minor: %d", retval>>20, retval&0xfffff);
 	}
 	else {
-		printk("Could not register device number!\n");
+		dbg_msg("Could not register device number!");
 		return -1;
 	}
 
@@ -74,7 +84,7 @@ static int __init ModuleInit(void) {
 
 static void __exit ModuleExit(void) {
 	unregister_chrdev(511, "/dev/dummy");
-	printk("XKLib exiting\n");
+	dbg_msg("XKLib exiting");
 }
 
 module_init(ModuleInit);
