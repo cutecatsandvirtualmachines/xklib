@@ -1,4 +1,4 @@
-EXTRA_CFLAGS = -I$(PWD)/include -Wno-incompatible-pointer-types -Wno-format -Wno-int-conversion
+EXTRA_CFLAGS = -I$(PWD)/include -Wno-incompatible-pointer-types -Wno-format -Wno-int-conversion -Wno-multichar
 KBUILD_CFLAGS += -g -Wall
 SRC_DIR := src
 SRC := $(wildcard $(SRC_DIR)/*.c)

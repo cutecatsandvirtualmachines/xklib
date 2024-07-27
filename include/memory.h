@@ -7,6 +7,7 @@
 #include "debug.h"
 #include "ia32.h"
 #include "xstdint.h"
+#include "hashmap.h"
 
 /**
  * IMPORTANT:
@@ -14,12 +15,12 @@
  * virt_to_phys
  */
 
+#define MM_TAG_GENERIC ('XLIB')
+#define MM_BUCKET_MAX 512
+
 #define INVALID_PGD(pgd) (!((pml4e_64 *)pgd)->present)
-
 #define INVALID_PUD(pud) (!((pdpte_64 *)pud)->present)
-
 #define INVALID_PMD(pmd) (!((pde_64 *)pmd)->present)
-
 #define INVALID_PTE(pte) (!((pte_64 *)pte)->present)
 
 #define XKLIB_PT(pt) (((pde_64 *)pt)->ignored1 == 3)
@@ -90,7 +91,9 @@ extern u64 kidentity_base;
 //Virtual address of the identity map used internally by xklib
 extern u64 xidentity_base;
 
-void mm_init(void);
+typedef u64 xklib_error;
+
+xklib_error mm_init(void);
 void mm_destroy(void);
 
 last_pt_t get_last_pt(unsigned long addr);

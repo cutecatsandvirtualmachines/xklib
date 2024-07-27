@@ -2,12 +2,29 @@
 
 u64 kidentity_base = 0;
 u64 xidentity_base = 0;
+struct hashmap *garbage = 0;
 
-void mm_init()
+xklib_error mm_init()
 {
 	char *p = kmalloc(8, GFP_KERNEL);
 	kidentity_base = p - virt_to_phys(p);
 	kfree(p);
+
+	garbage = hashmap__new(long_hash, long_cmp, 0);
+	u64 err = hashmap__add(garbage, MM_TAG_GENERIC,
+			       kmalloc_array(MM_BUCKET_MAX, sizeof(void *),
+					     GFP_KERNEL));
+
+	if (err) {
+		dbg_msg("Memory namespace initialization failed: 0x%llx", err);
+		return XKLIB_ENOCOLLECTOR;
+	}
+
+	u64 bucket = 0;
+	hashmap__find(garbage, MM_TAG_GENERIC, &bucket);
+	dbg_msg("Default collector bucket at: 0x%llx", bucket);
+
+	return XKLIB_SUCCESS;
 }
 
 void mm_destroy()
