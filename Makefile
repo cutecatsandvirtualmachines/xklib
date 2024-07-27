@@ -1,11 +1,13 @@
-obj-m += xklib.o
-xklib-y := src/xklib.o src/memory.o
-
-EXTRA_CFLAGS=-I$(PWD)/include -Wno-incompatible-pointer-types -Wno-format
+EXTRA_CFLAGS = -I$(PWD)/include -Wno-incompatible-pointer-types -Wno-format -Wno-int-conversion
+KBUILD_CFLAGS += -g -Wall
 SRC_DIR := src
 SRC := $(wildcard $(SRC_DIR)/*.c)
+BIN := xklib.ko
 
-all: test xklib
+obj-m += xklib.o
+xklib-y := src/xklib.o src/memory.o src/cpu.o
+
+all: clean test xklib
 
 test:
 	gcc -o runner/runner runner/runner.c -I ./include -Wno-format
