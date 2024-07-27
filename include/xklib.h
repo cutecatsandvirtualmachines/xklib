@@ -7,6 +7,7 @@
 #include "ioctl.h"
 #include "debug.h"
 #include "memory.h"
+#include "status.h"
 
 #define DEVICE_NAME "xklib"
 #define CLASS_NAME "XKClass"

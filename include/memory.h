@@ -85,6 +85,14 @@ typedef struct _last_pt_t {
 	enum last_pt_type pt_type;
 } last_pt_t;
 
+//Virtual address of the identity map used by the Linux kernel for kmalloc
+extern u64 kidentity_base;
+//Virtual address of the identity map used internally by xklib
+extern u64 xidentity_base;
+
+void mm_init(void);
+void mm_destroy(void);
+
 last_pt_t get_last_pt(unsigned long addr);
 void map_pdpte(pml4e_64 *ppml4e, unsigned long addr,
 	       struct pt_permissions perms, virt_addr_map *paddr_map);

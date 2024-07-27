@@ -1,5 +1,19 @@
 #include "memory.h"
 
+u64 kidentity_base = 0;
+u64 xidentity_base = 0;
+
+void mm_init()
+{
+	char *p = kmalloc(8, GFP_KERNEL);
+	kidentity_base = p - virt_to_phys(p);
+	kfree(p);
+}
+
+void mm_destroy()
+{
+}
+
 last_pt_t get_last_pt(unsigned long addr)
 {
 	last_pt_t last_pt = { 0 };

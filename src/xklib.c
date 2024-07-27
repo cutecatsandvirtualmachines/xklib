@@ -54,38 +54,30 @@ static int __init ModuleInit(void)
 
 	dbg_msg("XKLib initializing...");
 
-	char *p = kmalloc(8, GFP_KERNEL);
-	char *identity_base = p - virt_to_phys(p);
-	dbg_msg("Current PAGE_OFFSET: 0x%llx", identity_base);
-	xuint64_t i = 0;
-	while (!*(size_t *)(identity_base + i)) {
-		i += 8;
-	}
-	dbg_msg("data: 0x%llx\nat: 0x%llx", *(size_t *)(identity_base + i),
-		(identity_base + i));
-	kfree(p);
-	p = 0;
+	mm_init();
 
-	int retval = register_chrdev(511, "/dev/dummy", &fops);
-	if (retval == 0) {
-		dbg_msg("ioctl_example - registered Device number Major: %d, Minor: %d",
-			511, 0);
-	} else if (retval > 0) {
-		dbg_msg("ioctl_example - registered Device number Major: %d, Minor: %d",
-			retval >> 20, retval & 0xfffff);
-	} else {
-		dbg_msg("Could not register device number!");
-		return -1;
-	}
+	//int retval = register_chrdev(511, "xklib", &fops);
+	//if (retval == 0) {
+	//	dbg_msg("ioctl_example - registered Device number Major: %d, Minor: %d",
+	//		511, 0);
+	//} else if (retval > 0) {
+	//	dbg_msg("ioctl_example - registered Device number Major: %d, Minor: %d",
+	//		retval >> 20, retval & 0xfffff);
+	//} else {
+	//	dbg_msg("Could not register device number!");
+	//	return -1;
+	//}
 
 	bXklibInit = true;
 
-	return retval;
+	return XKLIB_SUCCESS;
 }
 
 static void __exit ModuleExit(void)
 {
-	unregister_chrdev(511, "/dev/dummy");
+	mm_destroy();
+
+	//unregister_chrdev(511, "xklib");
 	dbg_msg("XKLib exiting");
 }
 
