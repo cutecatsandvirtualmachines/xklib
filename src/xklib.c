@@ -1,10 +1,5 @@
 #include "xklib.h"
 
-/* Meta Information */
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("cutecatsandvirtualmachines");
-MODULE_DESCRIPTION("~");
-
 bool bXklibInit = false;
 
 static int driver_open(struct inode *device_file, struct file *instance)
@@ -23,7 +18,7 @@ static int main_ioctl(struct file *file, unsigned int cmd,
 	xklib_ioctl_data kernel_data = { 0 };
 
 	if (!access_ok(arg, sizeof(arg))) {
-		dbg_msg("Supplied argument pointer is invalid: %p", arg);
+		dbg_msg("Supplied argument pointer is invalid: 0x%llx", arg);
 		return EINVAL;
 	}
 	if (copy_from_user(&kernel_data, arg, sizeof(arg))) {
@@ -66,8 +61,10 @@ static int __init ModuleInit(void)
 	while (!*(size_t *)(identity_base + i)) {
 		i += 8;
 	}
-	dbg_msg("data: 0x%llx", *(size_t *)(identity_base + i));
+	dbg_msg("data: 0x%llx\nat: 0x%llx", *(size_t *)(identity_base + i),
+		(identity_base + i));
 	kfree(p);
+	p = 0;
 
 	int retval = register_chrdev(511, "/dev/dummy", &fops);
 	if (retval == 0) {
@@ -79,6 +76,19 @@ static int __init ModuleInit(void)
 	} else {
 		dbg_msg("Could not register device number!");
 		return -1;
+	}
+
+	struct pt_permissions perms = { 0 };
+	perms.read = true;
+	perms.write = true;
+	perms.exec = true;
+	p = map_physical(0, perms);
+	last_pt_t last_pt = get_last_pt(p);
+	dbg_msg("Mapped 0x0 at 0x%llx", p);
+	dbg_msg("Valid: %d - 0x%llx", last_pt.pt_type, last_pt.pte);
+	if (last_pt.pt_type != pt_type_invalid) {
+		volatile u64 val = *(u64 *)p;
+		*(u64 *)p = val;
 	}
 	bXklibInit = true;
 
@@ -93,3 +103,7 @@ static void __exit ModuleExit(void)
 
 module_init(ModuleInit);
 module_exit(ModuleExit);
+
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("cutecatsandvirtualmachines");
+MODULE_DESCRIPTION("~");
