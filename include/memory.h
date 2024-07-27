@@ -1,3 +1,4 @@
+#pragma once
 #include <asm/io.h>
 #include <asm/page_64_types.h>
 #include <linux/mm.h>

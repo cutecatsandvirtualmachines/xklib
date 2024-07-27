@@ -5,7 +5,7 @@ SRC := $(wildcard $(SRC_DIR)/*.c)
 BIN := xklib.ko
 
 obj-m += xklib.o
-xklib-y := src/xklib.o src/memory.o src/cpu.o
+xklib-y := src/xklib.o src/memory.o src/cpu.o src/hashmap.o
 
 all: clean test xklib
 

@@ -78,18 +78,6 @@ static int __init ModuleInit(void)
 		return -1;
 	}
 
-	struct pt_permissions perms = { 0 };
-	perms.read = true;
-	perms.write = true;
-	perms.exec = true;
-	p = map_physical(0, perms);
-	last_pt_t last_pt = get_last_pt(p);
-	dbg_msg("Mapped 0x0 at 0x%llx", p);
-	dbg_msg("Valid: %d - 0x%llx", last_pt.pt_type, last_pt.pte);
-	if (last_pt.pt_type != pt_type_invalid) {
-		volatile u64 val = *(u64 *)p;
-		*(u64 *)p = val;
-	}
 	bXklibInit = true;
 
 	return retval;
