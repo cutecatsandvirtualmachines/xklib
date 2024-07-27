@@ -2,7 +2,7 @@
 
 u64 kidentity_base = 0;
 u64 xidentity_base = 0;
-struct hashmap *garbage = 0;
+struct hashmap *collector = 0;
 
 xklib_error mm_init()
 {
@@ -10,8 +10,8 @@ xklib_error mm_init()
 	kidentity_base = p - virt_to_phys(p);
 	kfree(p);
 
-	garbage = hashmap__new(long_hash, long_cmp, 0);
-	u64 err = hashmap__add(garbage, MM_TAG_GENERIC,
+	collector = hashmap__new(long_hash, long_cmp, 0);
+	u64 err = hashmap__add(collector, MM_TAG_GENERIC,
 			       kmalloc_array(MM_BUCKET_MAX, sizeof(void *),
 					     GFP_KERNEL));
 
@@ -21,7 +21,7 @@ xklib_error mm_init()
 	}
 
 	u64 bucket = 0;
-	hashmap__find(garbage, MM_TAG_GENERIC, &bucket);
+	hashmap__find(collector, MM_TAG_GENERIC, &bucket);
 	dbg_msg("Default collector bucket at: 0x%llx", bucket);
 
 	return XKLIB_SUCCESS;
